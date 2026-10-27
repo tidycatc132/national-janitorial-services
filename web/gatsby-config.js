@@ -25,14 +25,15 @@ module.exports = {
       author: `Long Beach Janitorial`,
    },
    plugins: [
-      `gatsby-plugin-netlify`,
-      `gatsby-plugin-advanced-sitemap`,
-      `gatsby-plugin-postcss`,
-      `gatsby-plugin-image`,
-      `gatsby-transformer-sharp`,
-      `gatsby-plugin-offline`,
-      `gatsby-plugin-emotion`,
-      `gatsby-plugin-transition-link`,
+    `gatsby-plugin-react-helmet`,
+    `gatsby-plugin-netlify`,
+    `gatsby-plugin-advanced-sitemap`,
+    `gatsby-plugin-postcss`,
+    `gatsby-plugin-image`,
+    `gatsby-transformer-sharp`,
+    `gatsby-plugin-offline`,
+    `gatsby-plugin-emotion`,
+    `gatsby-plugin-transition-link`,
       {
          resolve: `gatsby-plugin-sharp`,
          options: {
