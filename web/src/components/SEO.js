@@ -1,85 +1,86 @@
 import React from "react";
-import { useStaticQuery, graphql } from "gatsby";
 import PropTypes from "prop-types";
 import { Helmet } from "react-helmet";
+import { useStaticQuery, graphql } from "gatsby";
 
-const SEO = ({ description, lang, meta, keywords, title, openGraphImage, twitterOpenGraphImage, canonicalUrl, noIndex, jsonLd }) => {
+const SearchEngineOptimization = ({
+  title,
+  description,
+  pathname,
+  openGraphImage,
+  article = false,
+  lang,
+  keywords,
+  noIndex,
+  meta,
+  jsonLd,
+}) => {
   const { site } = useStaticQuery(graphql`
-    query DefaultSEOQuery {
+    query {
       site {
         siteMetadata {
-          author
+          defaultTitle: title
+          defaultDescription: description
           siteUrl
+          defaultImage: image
+          twitterUsername
+          author
         }
       }
     }
   `);
 
-  const metaDescription = description || site.siteMetadata.description;
-  const socialDefault = `${site.siteMetadata.siteUrl}${openGraphImage}`;
-  const socialTwitter = `${site.siteMetadata.siteUrl}${twitterOpenGraphImage}`;
+  const metaTitle = title || site?.siteMetadata?.defaultTitle || "Commercial Cleaning Services";
+  const metaDescription = description || site?.siteMetadata?.defaultDescription || "";
+  const siteUrl = site?.siteMetadata?.siteUrl || "";
+  const canonicalUrl = pathname ? `${siteUrl}${pathname}` : siteUrl;
+
+  const imageUrl = openGraphImage
+    ? openGraphImage.startsWith("http")
+      ? openGraphImage
+      : `${siteUrl}${openGraphImage}`
+    : site?.siteMetadata?.defaultImage
+    ? `${siteUrl}${site?.siteMetadata?.defaultImage}`
+    : "";
 
   return (
     <Helmet
-      htmlAttributes={{
-        lang,
-      }}
+      htmlAttributes={{ lang }}
+      title={metaTitle}
+      titleTemplate="%s"
       link={canonicalUrl ? [{ rel: "canonical", href: canonicalUrl }] : []}
       meta={[
-        {
-          name: `description`,
-          content: metaDescription,
-        },
-        {
-          property: `og:title`,
-          content: title,
-        },
-        {
-          property: `og:image`,
-          content: socialDefault,
-        },
-        {
-          property: `og:description`,
-          content: metaDescription,
-        },
-        {
-          property: `og:type`,
-          content: `website`,
-        },
-        {
-          name: `twitter:card`,
-          content: `summary`,
-        },
-        {
-          name: `twitter:creator`,
-          content: site.siteMetadata.author,
-        },
-        {
-          name: `twitter:title`,
-          content: title,
-        },
-        {
-          name: `twitter:description`,
-          content: metaDescription,
-        },
-        {
-          name: `twitter:image`,
-          content: socialTwitter,
-        },
-      ]
-        .concat(
-          keywords.length > 0
-            ? {
-                name: `keywords`,
-                content: keywords.join(`, `),
-              }
-            : []
-        )
-        .concat(noIndex ? { name: `robots`, content: `noindex, nofollow` } : [])
-        .concat(meta)}
-      title={title}
-      titleTemplate={`%s`}
+        { name: `description`, content: metaDescription },
+
+        // Open Graph
+        { property: `og:title`, content: metaTitle },
+        { property: `og:description`, content: metaDescription },
+        { property: `og:type`, content: article ? `article` : `website` },
+        { property: `og:url`, content: canonicalUrl },
+        ...(imageUrl ? [{ property: `og:image`, content: imageUrl }] : []),
+
+        // Twitter
+        { name: `twitter:card`, content: `summary_large_image` },
+        { name: `twitter:title`, content: metaTitle },
+        { name: `twitter:description`, content: metaDescription },
+        ...(site?.siteMetadata?.twitterUsername || site?.siteMetadata?.author
+          ? [
+              {
+                name: `twitter:creator`,
+                content: site?.siteMetadata?.twitterUsername || site?.siteMetadata?.author,
+              },
+            ]
+          : []),
+        ...(imageUrl ? [{ name: `twitter:image`, content: imageUrl }] : []),
+      ]}
     >
+      {/* Optional Keywords & NoIndex */}
+      {keywords.length > 0 && (
+        <meta name="keywords" content={keywords.join(`, `)} />
+      )}
+      {noIndex && <meta name="robots" content="noindex, nofollow" />}
+
+      {/* JSON-LD Schema Markup */}
       {[].concat(jsonLd || []).map((ld, i) => (
         <script key={i} type="application/ld+json">
           {JSON.stringify(ld)}
@@ -89,23 +90,24 @@ const SEO = ({ description, lang, meta, keywords, title, openGraphImage, twitter
   );
 };
 
-SEO.defaultProps = {
+SearchEngineOptimization.defaultProps = {
   lang: `en`,
   keywords: [],
   meta: [],
+  noIndex: false,
 };
 
-SEO.propTypes = {
-  description: PropTypes.string,
-  keywords: PropTypes.arrayOf(PropTypes.string),
-  lang: PropTypes.string,
-  meta: PropTypes.array,
+SearchEngineOptimization.propTypes = {
   title: PropTypes.string,
-  twitterOpenGraphImage: PropTypes.string,
+  description: PropTypes.string,
+  pathname: PropTypes.string,
   openGraphImage: PropTypes.string,
-  canonicalUrl: PropTypes.string,
+  article: PropTypes.bool,
+  lang: PropTypes.string,
+  keywords: PropTypes.arrayOf(PropTypes.string),
   noIndex: PropTypes.bool,
+  meta: PropTypes.array,
   jsonLd: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
 };
 
-export default SEO;
+export default SearchEngineOptimization;
